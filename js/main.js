@@ -73,17 +73,88 @@
     });
   }
 
-  // Contact form (client-side acknowledgment)
+  // Contact form → Formspree (AJAX, stays on page)
   var form = document.getElementById("contact-form");
   if (form) {
     var statusEl = form.querySelector(".form-status");
+    var submitBtn = form.querySelector('button[type="submit"]');
+    var action = form.getAttribute("action") || "";
+
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      if (statusEl) {
-        statusEl.textContent = "Thanks — we’ll get back to you shortly.";
-        statusEl.classList.add("success");
+
+      if (!action || action.indexOf("formspree.io") === -1 || action.indexOf("YOUR_FORM_ID") !== -1) {
+        if (statusEl) {
+          statusEl.textContent =
+            "Set your Formspree URL: in contact.html, replace YOUR_FORM_ID in the form’s action with your form ID from Formspree.";
+          statusEl.classList.remove("success");
+          statusEl.classList.add("form-error");
+        }
+        return;
       }
-      form.reset();
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      var defaultLabel = submitBtn ? submitBtn.getAttribute("data-default-label") || submitBtn.textContent : "";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending…";
+      }
+      if (statusEl) {
+        statusEl.textContent = "";
+        statusEl.classList.remove("success", "form-error");
+      }
+
+      fetch(action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" },
+      })
+        .then(function (res) {
+          return res
+            .json()
+            .catch(function () {
+              return {};
+            })
+            .then(function (data) {
+              return { res: res, data: data };
+            });
+        })
+        .then(function (result) {
+          if (result.res.ok) {
+            if (statusEl) {
+              statusEl.textContent = "Thanks — we’ll get back to you shortly.";
+              statusEl.classList.add("success");
+              statusEl.classList.remove("form-error");
+            }
+            form.reset();
+          } else {
+            var err0 = result.data.errors && result.data.errors[0];
+            var msg =
+              (result.data && result.data.error) ||
+              (typeof err0 === "string" ? err0 : err0 && err0.message) ||
+              "Something went wrong. Try again or email us directly.";
+            if (statusEl) {
+              statusEl.textContent = typeof msg === "string" ? msg : "Please check the form and try again.";
+              statusEl.classList.add("form-error");
+            }
+          }
+        })
+        .catch(function () {
+          if (statusEl) {
+            statusEl.textContent = "Network error. Check your connection and try again.";
+            statusEl.classList.add("form-error");
+          }
+        })
+        .finally(function () {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = defaultLabel;
+          }
+        });
     });
   }
 })();

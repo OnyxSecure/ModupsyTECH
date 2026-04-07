@@ -795,6 +795,7 @@ section {
 }
 
 .contact-side {
+  position: relative;
   padding: 2rem;
   border-radius: var(--radius);
   background: var(--surface);
@@ -846,6 +847,19 @@ section {
 
 .form-status.success {
   color: var(--purple-bright);
+}
+
+.form-status.form-error {
+  color: #f87171;
+}
+
+.form-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .contact-alt {
