@@ -83,7 +83,7 @@
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      if (!action || action.indexOf("formspree.io") === -1 || action.indexOf("YOUR_FORM_ID") !== -1) {
+      if (!action || action.indexOf("formspree.io") === -1 || action.indexOf("xjgpzkea") !== -1) {
         if (statusEl) {
           statusEl.textContent =
             "Set your Formspree URL: in contact.html, replace YOUR_FORM_ID in the form’s action with your form ID from Formspree.";
